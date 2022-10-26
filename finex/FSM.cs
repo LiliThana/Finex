@@ -1,11 +1,27 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 
 public abstract partial class FSM : Node
 {
-	private List<IState> stateStack = new List<IState>();
+	private List<State> stateStack = new List<State>();
 
-	private Dictionary<string, IState> stateMap = new Dictionary<string, IState>();
+	private Dictionary<string, State> stateMap = new Dictionary<string, State>();
+
+	[Signal]
+	delegate void StateEnteredEventHandler(State state);
+
+	[Signal]
+	delegate void StateChangedEventHandler(State newState);
+
+	[Signal]
+	delegate void StatePushedEventHandler(State newState);
+
+	[Signal]
+	delegate void StatePoppedEventHandler();
+
+	[Signal]
+	delegate void StateExitedEventHandler(State state);
 
 	/// <summary>
 	/// ## Summary
@@ -19,7 +35,7 @@ public abstract partial class FSM : Node
 	/// ## Remarks
 	/// <c>CurrentState</c> is the state sitting on the top of the state stack. All operations done by the FSM will be done to this state.
 	/// </remarks>
-	public IState CurrentState
+	public State CurrentState
 	{
 		get { return stateStack[0]; }
 		private set { stateStack[0] = value; }
@@ -42,30 +58,12 @@ public abstract partial class FSM : Node
 	/// can then instantiate all the states and easily swap between them using ChangeState(), PushState(),
 	/// and PopState().
 	/// </remarks>
-	public Dictionary<string, IState> StateMap
+	public Dictionary<string, State> StateMap
 	{
 		get { return stateMap; }
 		protected set { stateMap = value; }
 	}
 	
-	/// <summary>
-	/// ## Summary
-	/// <c>Configure()</c> is used by derived classes to configure the FSM.
-	/// </summary>
-	/// <example>
-	/// ## Example
-	/// The primary use of <c>Configure()</c> is to map the states associated with the FSM.
-	/// <code>
-	/// 	public override void Configure()
-	/// 	{
-	/// 		StateMap["Idle"] = GetNode&lt;IState>("Idle");
-	/// 		StateMap["Walk"] = GetNode&lt;IState>("Walk");
-	/// 		StateMap["Run"] = GetNode&lt;IState>("Run");
-	/// 	}
-	/// </code>
-	/// </example>
-	public abstract void Configure();
-
     public override void _Ready()
     {
         Configure();
@@ -79,6 +77,31 @@ public abstract partial class FSM : Node
 	public override void _Process(double delta)
 	{
 		CurrentState.Update(delta);
+	}
+
+	/// <summary>
+	/// Configures the FSM.
+	/// </summary>
+	/// <remarks>
+	/// Configure takes its child states in the node hierarchy and maps them to the State Map. At least one
+	/// state node must be added as a child or <c>Configure</c> will throw an exception.
+	public void Configure()
+	{
+		Godot.Collections.Array<Node> children = GetChildren();
+		if (children.Count <= 0)
+		{
+			throw new InvalidOperationException("FSM has no States as children");
+		}
+
+		// Populate StateMap and connect signals
+		foreach(State state in children)
+		{
+			string stateName = state.Name.ToString().ToLower();
+			StateMap[stateName] = state;
+			state.ChangeState += OnChangeState;
+			state.PopState += OnPopState;
+			state.PushState += OnPushState;
+		}
 	}
 
     public override void _PhysicsProcess(double delta)
@@ -96,11 +119,15 @@ public abstract partial class FSM : Node
 	/// This changes <see cref="CurrentState"/> to <c>newState</c>. This removes the current state from <see cref="StateMap"/> and replaces it with <c>newState</c>.
 	/// Use this for whenever you don't intend to need to return to the current state immediately.
 	/// </remarks>
-	public void ChangeState(string newState)
+	public void OnChangeState(string newState)
 	{
+		State previousState = CurrentState;
 		CurrentState.Exit();
+		EmitSignal(SignalName.StateChanged, CurrentState);
 		CurrentState = StateMap[newState];
 		CurrentState.Enter();
+		EmitSignal(SignalName.StateExited, CurrentState);
+		EmitSignal(SignalName.StateChanged, CurrentState);
 	}
 
 	/// <summary>
@@ -117,7 +144,7 @@ public abstract partial class FSM : Node
 	/// ## Example
 	/// An examples is pushing Jump onto Idle, Run, or Walk states. Once the jump is over you can pop it off and then return to the previous state.
 	/// </example>
-	public void PushState(string newState)
+	public void OnPushState(string newState)
 	{
 		CurrentState.Exit();
 		stateStack.Insert(0, StateMap[newState]);
@@ -136,7 +163,7 @@ public abstract partial class FSM : Node
 	/// ## Example
 	/// An example is popping Jump upon the player landing and returning to Idle, Walk, or Run.
 	/// </example>
-	public void PopState()
+	public void OnPopState()
 	{
 		CurrentState.Exit();
 		stateStack.RemoveAt(0);

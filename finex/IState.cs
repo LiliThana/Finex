@@ -3,29 +3,7 @@ using System;
 
 public interface IState
 {
-    /// <summary>
-    /// ## Summary
-    /// This signals the FSM to change to the provided state.
-    /// </summary>
-    /// <param name="newState">The state that is to be changed to.</param>
-    [Signal]
-    delegate void ChangeState(string newState);
-
-    /// <summary>
-    /// ## Summary
-    /// This signals the FSM to pop off the current state.
-    /// </summary>
-    [Signal]
-    delegate void PopState();
-
-    /// <summary>
-    /// ## Summary
-    /// This signals the FSM to push the provided state onto the stack.
-    /// </summary>
-    /// <param name="newState">The state to be pushed</param>
-    [Signal]
-    delegate void PushState(string newState);
-
+    
     /// <summary>
     /// ## Summary
     /// This is called once upon entering the state, before any processing occurs.
