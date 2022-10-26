@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class State : Node, IState
+public abstract partial class State : Node
 {
 	/// <summary>
     /// ## Summary
@@ -26,13 +26,13 @@ public partial class State : Node, IState
     [Signal]
     public delegate void PushStateEventHandler(string newState);
 
-	public virtual void Enter(){}
+	public abstract void Enter();
 
-	public virtual void HandleInput(InputEvent @event){}
+	public abstract void HandleInput(InputEvent @event);
 
-	public virtual void Update(double delta){}
+	public abstract void Update(double delta);
 
-	public virtual void UpdatePhysics(double delta){}
+	public abstract void UpdatePhysics(double delta);
 
-	public virtual void Exit(){}
+	public abstract void Exit();
 }

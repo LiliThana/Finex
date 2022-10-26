@@ -9,19 +9,19 @@ public abstract partial class FSM : Node
 	private Dictionary<string, State> stateMap = new Dictionary<string, State>();
 
 	[Signal]
-	delegate void StateEnteredEventHandler(State state);
+	public delegate void StateEnteredEventHandler(State state);
 
 	[Signal]
-	delegate void StateChangedEventHandler(State newState);
+	public delegate void StateChangedEventHandler(State newState);
 
 	[Signal]
-	delegate void StatePushedEventHandler(State newState);
+	public delegate void StatePushedEventHandler(State newState);
 
 	[Signal]
-	delegate void StatePoppedEventHandler();
+	public delegate void StatePoppedEventHandler();
 
 	[Signal]
-	delegate void StateExitedEventHandler(State state);
+	public delegate void StateExitedEventHandler(State state);
 
 	/// <summary>
 	/// ## Summary
@@ -54,7 +54,7 @@ public abstract partial class FSM : Node
 	/// </value>
 	/// <remarks>
 	/// ## Remarks
-	/// The <c>StateMap</c> is a dictionary that maps the name of the string to the actual IState object. The FSM
+	/// The <c>StateMap</c> is a dictionary that maps the name of the string to the actual State object. The FSM
 	/// can then instantiate all the states and easily swap between them using ChangeState(), PushState(),
 	/// and PopState().
 	/// </remarks>
@@ -85,6 +85,7 @@ public abstract partial class FSM : Node
 	/// <remarks>
 	/// Configure takes its child states in the node hierarchy and maps them to the State Map. At least one
 	/// state node must be added as a child or <c>Configure</c> will throw an exception.
+	/// </remarks>
 	public void Configure()
 	{
 		Godot.Collections.Array<Node> children = GetChildren();
@@ -122,11 +123,13 @@ public abstract partial class FSM : Node
 	public void OnChangeState(string newState)
 	{
 		State previousState = CurrentState;
+
 		CurrentState.Exit();
-		EmitSignal(SignalName.StateChanged, CurrentState);
+		EmitSignal(SignalName.StateExited, CurrentState);
+
 		CurrentState = StateMap[newState];
 		CurrentState.Enter();
-		EmitSignal(SignalName.StateExited, CurrentState);
+		EmitSignal(SignalName.StateEntered, CurrentState);
 		EmitSignal(SignalName.StateChanged, CurrentState);
 	}
 
@@ -147,8 +150,12 @@ public abstract partial class FSM : Node
 	public void OnPushState(string newState)
 	{
 		CurrentState.Exit();
+		EmitSignal(SignalName.StateExited, CurrentState);
+
 		stateStack.Insert(0, StateMap[newState]);
 		CurrentState.Enter();
+		EmitSignal(SignalName.StateEntered, CurrentState);
+		EmitSignal(SignalName.StatePushed, CurrentState);
 	}
 
 	/// <summary>
@@ -166,7 +173,11 @@ public abstract partial class FSM : Node
 	public void OnPopState()
 	{
 		CurrentState.Exit();
+		EmitSignal(SignalName.StateExited, CurrentState);
+
 		stateStack.RemoveAt(0);
 		CurrentState.Enter();
+		EmitSignal(SignalName.StateEntered, CurrentState);
+		EmitSignal(SignalName.StatePopped);
 	}
 }
