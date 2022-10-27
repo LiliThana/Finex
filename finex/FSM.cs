@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public abstract partial class FSM : Node
+public partial class FSM : Node
 {
 	private List<State> stateStack = new List<State>();
 
@@ -38,7 +38,7 @@ public abstract partial class FSM : Node
 	public State CurrentState
 	{
 		get { return stateStack[0]; }
-		private set { stateStack[0] = value; }
+		private set { stateStack.Insert(0, value); }
 	}
 
 	/// <summary>
@@ -79,6 +79,11 @@ public abstract partial class FSM : Node
 		CurrentState.Update(delta);
 	}
 
+    public override void _PhysicsProcess(double delta)
+    {
+        CurrentState.UpdatePhysics(delta);
+    }
+
 	/// <summary>
 	/// Configures the FSM.
 	/// </summary>
@@ -103,12 +108,10 @@ public abstract partial class FSM : Node
 			state.PopState += OnPopState;
 			state.PushState += OnPushState;
 		}
-	}
 
-    public override void _PhysicsProcess(double delta)
-    {
-        CurrentState.UpdatePhysics(delta);
-    }
+		CurrentState = GetChild<State>(0);
+		CurrentState.Enter();
+	}
 
 	/// <summary>
 	/// ## Summary
