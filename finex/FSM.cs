@@ -102,7 +102,7 @@ public partial class FSM : Node
 		// Populate StateMap and connect signals
 		foreach(State state in children)
 		{
-			string stateName = state.Name.ToString().ToLower();
+			string stateName = state.Name.ToString();
 			StateMap[stateName] = state;
 			state.ChangeState = new Callable(this, MethodName.ChangeState);
 			state.PopState = new Callable(this, MethodName.PopState);
