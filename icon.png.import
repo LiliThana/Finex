@@ -3,22 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7ecoy1uouthr"
-path="res://.godot/imported/icon.png-da7fccfc24d497c1aed7c76b51edbd37.ctex"
+path="res://.godot/imported/icon.png-9ce7421b1a1c33ce0584d3cac1103cae.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/finex/icon.png"
-dest_files=["res://.godot/imported/icon.png-da7fccfc24d497c1aed7c76b51edbd37.ctex"]
+source_file="res://addons/Finex/icon.png"
+dest_files=["res://.godot/imported/icon.png-9ce7421b1a1c33ce0584d3cac1103cae.ctex"]
 
 [params]
 
 compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
-compress/bptc_ldr=0
 compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=false

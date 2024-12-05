@@ -104,9 +104,9 @@ public partial class FSM : Node
 		{
 			string stateName = state.Name.ToString().ToLower();
 			StateMap[stateName] = state;
-			state.ChangeState += OnChangeState;
-			state.PopState += OnPopState;
-			state.PushState += OnPushState;
+			state.ChangeState = new Callable(this, MethodName.ChangeState);
+			state.PopState = new Callable(this, MethodName.PopState);
+			state.PushState = new Callable(this, MethodName.PushState);
 		}
 
 		CurrentState = GetChild<State>(0);
@@ -123,7 +123,7 @@ public partial class FSM : Node
 	/// This changes <see cref="CurrentState"/> to <c>newState</c>. This removes the current state from <see cref="StateMap"/> and replaces it with <c>newState</c>.
 	/// Use this for whenever you don't intend to need to return to the current state immediately.
 	/// </remarks>
-	public void OnChangeState(string newState)
+	public void ChangeState(string newState)
 	{
 		State previousState = CurrentState;
 
@@ -150,7 +150,7 @@ public partial class FSM : Node
 	/// ## Example
 	/// An examples is pushing Jump onto Idle, Run, or Walk states. Once the jump is over you can pop it off and then return to the previous state.
 	/// </example>
-	public void OnPushState(string newState)
+	public void PushState(string newState)
 	{
 		CurrentState.Exit();
 		EmitSignal(SignalName.StateExited, CurrentState);
@@ -173,7 +173,7 @@ public partial class FSM : Node
 	/// ## Example
 	/// An example is popping Jump upon the player landing and returning to Idle, Walk, or Run.
 	/// </example>
-	public void OnPopState()
+	public void PopState()
 	{
 		CurrentState.Exit();
 		EmitSignal(SignalName.StateExited, CurrentState);

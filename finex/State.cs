@@ -8,23 +8,20 @@ public partial class State : Node
     /// This signals the FSM to change to the provided state.
     /// </summary>
     /// <param name="newState">The state that is to be changed to.</param>
-    [Signal]
-    public delegate void ChangeStateEventHandler(string newState);
+    public Callable ChangeState;
 
     /// <summary>
     /// ## Summary
     /// This signals the FSM to pop off the current state.
     /// </summary>
-    [Signal]
-    public delegate void PopStateEventHandler();
+    public Callable PopState;
 
     /// <summary>
     /// ## Summary
     /// This signals the FSM to push the provided state onto the stack.
     /// </summary>
     /// <param name="newState">The state to be pushed</param>
-    [Signal]
-    public delegate void PushStateEventHandler(string newState);
+    public Callable PushState;
 
 	public virtual void Enter(){}
 
