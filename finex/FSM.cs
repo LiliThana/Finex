@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
+[GlobalClass]
 public partial class FSM : Node
 {
 	private List<State> stateStack = new List<State>();
